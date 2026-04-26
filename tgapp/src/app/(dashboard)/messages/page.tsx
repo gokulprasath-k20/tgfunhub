@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { ActiveChat } from '@/components/chat/ActiveChat';
 import { MessageSquare } from 'lucide-react';
 
 import { useSearchParams } from 'next/navigation';
 
-export default function MessagesPage() {
+function MessagesContent() {
   const searchParams = useSearchParams();
   const [activeConversationId, setActiveConversationId] = useState<string | null>(searchParams.get('id'));
 
@@ -57,5 +57,13 @@ export default function MessagesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-56px)]">Loading...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }
