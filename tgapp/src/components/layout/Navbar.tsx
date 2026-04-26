@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { Modal } from '@/components/ui/Modal';
+import { CreatePost } from '@/components/feed/CreatePost';
 import { 
   Rss, 
   User, 
@@ -31,6 +34,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const { logout } = useAuth();
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
@@ -68,6 +72,14 @@ export function Navbar() {
         {/* Right side - Actions */}
         <div className="flex items-center gap-1.5 md:gap-3">
           <ThemeToggle compact />
+          
+          <button 
+            onClick={() => setIsCreatePostOpen(true)}
+            className="p-2 hover:bg-[#f9f9f9] dark:hover:bg-[#111111] rounded-full transition-colors"
+            aria-label="Create Post"
+          >
+            <PlusSquare className="w-6 h-6 stroke-[1.5px]" />
+          </button>
           
           <Link 
             href="/shop"
@@ -124,6 +136,10 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      <Modal isOpen={isCreatePostOpen} onClose={() => setIsCreatePostOpen(false)} title="Create Post" size="md">
+        <CreatePost onPostCreated={() => setIsCreatePostOpen(false)} />
+      </Modal>
     </header>
   );
 }

@@ -6,7 +6,7 @@ import Lenis from 'lenis';
 import { motion } from 'framer-motion';
 import { usePosts } from '@/hooks/usePosts';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import { CreatePost } from '@/components/feed/CreatePost';
+
 import { PostCard } from '@/components/feed/PostCard';
 import { FeedSkeleton } from '@/components/feed/FeedSkeleton';
 import { Loader } from '@/components/shared/Loader';
@@ -55,9 +55,6 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-xl mx-auto space-y-4">
-      <motion.div initial="hidden" animate="show" variants={fadeUp}>
-        <CreatePost />
-      </motion.div>
 
       {isLoading && <FeedSkeleton count={4} />}
 

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
 
-export function CreatePost() {
+export function CreatePost({ onPostCreated }: { onPostCreated?: () => void }) {
   const { user } = useAuthStore();
   const [images, setImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -66,6 +66,7 @@ export function CreatePost() {
         onSuccess: () => {
           reset();
           setImages([]);
+          onPostCreated?.();
         },
       }
     );
