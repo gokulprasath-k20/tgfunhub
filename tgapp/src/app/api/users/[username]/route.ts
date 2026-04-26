@@ -5,12 +5,13 @@ import User from '@/lib/db/models/User';
 // GET /api/users/[username] — public profile
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
+    const { username } = await params;
     await connectDB();
 
-    const user = await User.findOne({ username: params.username })
+    const user = await User.findOne({ username })
       .select('username profileImage bio isPrivate createdAt')
       .lean();
 

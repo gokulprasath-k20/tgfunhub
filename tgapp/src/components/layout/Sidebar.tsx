@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
-import { Rss, User, Settings, LogOut, Film, MessageSquare, PlaySquare, ShoppingBag } from 'lucide-react';
+import { Rss, User, Settings, LogOut, Film, MessageSquare, PlaySquare, ShoppingBag, Music2 } from 'lucide-react';
 import Image from 'next/image';
 
 const navLinks = [
   { href: '/feed', label: 'Feed', icon: Rss },
   { href: '/reels', label: 'Reels', icon: Film },
-  { href: '/videos', label: 'Videos', icon: PlaySquare },
+  { href: '/music', label: 'Music', icon: Music2 },
   { href: '/shop', label: 'Shop', icon: ShoppingBag },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
   { href: '/settings', label: 'Settings', icon: Settings },

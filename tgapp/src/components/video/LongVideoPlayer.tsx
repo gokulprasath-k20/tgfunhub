@@ -20,6 +20,17 @@ export function LongVideoPlayer({ src, poster }: LongVideoPlayerProps) {
   const [showControls, setShowControls] = useState(true);
   let hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // YouTube detection
+  const getYoutubeId = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?v=)|(&v=))([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[8].length === 11) ? match[8] : null;
+  };
+
+  const youtubeId = getYoutubeId(src);
+  console.log('Video Player Source:', src, 'Detected YouTube ID:', youtubeId);
+
   const formatTime = (time: number) => {
     if (isNaN(time)) return '0:00';
     const minutes = Math.floor(time / 60);
@@ -96,10 +107,23 @@ export function LongVideoPlayer({ src, poster }: LongVideoPlayerProps) {
     }
   };
 
+  if (youtubeId) {
+    return (
+      <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group"
+      className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group shadow-2xl border border-[#e5e5e5]/10 dark:border-[#2a2a2a]/50"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
@@ -133,15 +157,15 @@ export function LongVideoPlayer({ src, poster }: LongVideoPlayerProps) {
       >
         {/* Scrubber */}
         <div 
-          className="w-full h-1.5 bg-white/30 rounded-full mb-4 cursor-pointer relative"
+          className="w-full h-1.5 bg-white/30 rounded-full mb-4 cursor-pointer relative group/scrubber"
           onClick={handleProgressClick}
         >
           <div 
-            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
+            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
             style={{ width: `${progress}%` }}
           />
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow transition-transform scale-0 group-hover:scale-100"
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow transition-transform scale-0 group-hover/scrubber:scale-100"
             style={{ left: `calc(${progress}% - 6px)` }}
           />
         </div>
@@ -155,7 +179,7 @@ export function LongVideoPlayer({ src, poster }: LongVideoPlayerProps) {
             <button onClick={toggleMute} className="hover:text-blue-400 transition-colors">
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
-            <div className="text-xs font-medium font-mono">
+            <div className="text-xs font-medium font-mono text-gray-300">
               {currentTime} / {duration}
             </div>
           </div>
@@ -170,3 +194,4 @@ export function LongVideoPlayer({ src, poster }: LongVideoPlayerProps) {
     </div>
   );
 }
+

@@ -1,13 +1,16 @@
 'use client';
 
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { useVideos } from '@/hooks/useVideos';
 import { VideoCard } from '@/components/video/VideoCard';
-import { PlaySquare } from 'lucide-react';
+import { PlaySquare, Search, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 export default function VideosPage() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useVideos();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSource, setActiveSource] = useState<'local' | 'youtube'>('local');
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useVideos(activeSource);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const handleObserver = useCallback(
@@ -28,7 +31,7 @@ export default function VideosPage() {
 
   if (status === 'pending') {
     return (
-      <div className="w-full">
+      <div className="w-full max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="flex flex-col gap-3 animate-pulse">
@@ -51,21 +54,53 @@ export default function VideosPage() {
     return <div className="text-center p-8 text-red-500">Failed to load videos.</div>;
   }
 
-  const videos = data.pages.flatMap((page) => page.posts);
+  const videos = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#0a0a0a] dark:text-[#fafafa] flex items-center gap-2">
-          <PlaySquare className="w-6 h-6" />
-          Videos
-        </h1>
-        <Link
-          href="/videos/create"
-          className="px-4 py-2 bg-[#0a0a0a] dark:bg-[#fafafa] text-white dark:text-black rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+    <div className="w-full max-w-7xl mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[#0a0a0a] dark:text-[#fafafa] flex items-center gap-3 tracking-tight">
+            <PlaySquare className="w-8 h-8 text-blue-500" />
+            Discover
+          </h1>
+          <p className="text-[#a3a3a3] mt-1 text-sm">Explore trending content across the community and YouTube.</p>
+        </div>
+
+        <div className="flex flex-1 max-w-md items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a3a3a3]" />
+            <input
+              type="text"
+              placeholder="Search community or YouTube..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Link href="/videos/create">
+            <Button size="sm" className="h-10 rounded-xl px-4 flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Upload
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Source Selector Tabs */}
+      <div className="flex items-center gap-1 p-1 bg-[#f0f0f0] dark:bg-[#1a1a1a] rounded-xl w-max mb-8">
+        <button
+          onClick={() => setActiveSource('local')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeSource === 'local' ? 'bg-white dark:bg-[#2a2a2a] shadow-sm text-[#0a0a0a] dark:text-[#fafafa]' : 'text-[#a3a3a3] hover:text-[#525252]'}`}
         >
-          Upload Video
-        </Link>
+          Community
+        </button>
+        <button
+          onClick={() => setActiveSource('youtube')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeSource === 'youtube' ? 'bg-white dark:bg-[#2a2a2a] shadow-sm text-[#0a0a0a] dark:text-[#fafafa]' : 'text-[#a3a3a3] hover:text-[#525252]'}`}
+        >
+          YouTube Trending
+        </button>
       </div>
 
       {videos.length === 0 ? (
@@ -73,8 +108,8 @@ export default function VideosPage() {
           <div className="w-16 h-16 rounded-full bg-[#f0f0f0] dark:bg-[#1a1a1a] flex items-center justify-center mb-4">
             <PlaySquare className="w-8 h-8 text-[#a3a3a3]" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">No videos found</h2>
-          <p className="text-[#a3a3a3]">Be the first to upload a video.</p>
+          <h2 className="text-xl font-semibold mb-2 text-[#0a0a0a] dark:text-[#fafafa]">No videos found</h2>
+          <p className="text-[#a3a3a3] text-sm">Be the first to upload or check trending videos.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10">
@@ -84,9 +119,9 @@ export default function VideosPage() {
         </div>
       )}
 
-      <div ref={loadMoreRef} className="h-20 flex items-center justify-center mt-4">
+      <div ref={loadMoreRef} className="h-20 flex items-center justify-center mt-8">
         {isFetchingNextPage && (
-          <div className="w-6 h-6 border-2 border-[#0a0a0a] dark:border-[#fafafa] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
         )}
       </div>
     </div>

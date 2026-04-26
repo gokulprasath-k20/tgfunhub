@@ -8,15 +8,15 @@ const PAGE_SIZE = 20;
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: conversationId } = await params;
     const user = getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const conversationId = params.id;
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get('cursor');
 
@@ -59,9 +59,10 @@ export async function GET(
 // POST /api/conversations/[id]/messages
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: conversationId } = await params;
     const user = getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -73,7 +74,6 @@ export async function POST(
     }
 
     await connectDB();
-    const conversationId = params.id;
 
     // Verify conversation exists and user is participant
     const conversation = await Conversation.findById(conversationId);

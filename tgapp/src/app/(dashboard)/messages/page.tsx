@@ -5,8 +5,11 @@ import { ConversationList } from '@/components/chat/ConversationList';
 import { ActiveChat } from '@/components/chat/ActiveChat';
 import { MessageSquare } from 'lucide-react';
 
+import { useSearchParams } from 'next/navigation';
+
 export default function MessagesPage() {
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(searchParams.get('id'));
 
   return (
     <div className="flex h-[calc(100vh-112px)] md:h-[calc(100vh-56px)] bg-white dark:bg-[#0a0a0a]">

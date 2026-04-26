@@ -46,6 +46,9 @@ const config: Config = {
       borderRadius: {
         DEFAULT: '8px',
       },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+      },
       screens: {
         xs: '375px',
       },

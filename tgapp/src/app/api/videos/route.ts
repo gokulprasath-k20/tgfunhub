@@ -4,46 +4,57 @@ import Post from '@/lib/db/models/Post';
 import { getAuthUser } from '@/lib/auth/middleware';
 import { CreateVideoSchema } from '@/lib/validators/post';
 
+import { fetchTrendingVideos } from '@/lib/utils/youtube';
+
 const PAGE_SIZE = 12;
 
 export async function GET(req: NextRequest) {
   try {
     const user = getAuthUser(req);
-    // Videos might be public, but we get the user to check likes
-    
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get('cursor');
+    const source = searchParams.get('source') || 'all'; // 'local', 'youtube', or 'all'
 
     await connectDB();
 
-    const query: Record<string, unknown> = { type: 'video' };
-    if (cursor) {
-      query._id = { $lt: cursor };
+    let localVideos: any[] = [];
+    if (source === 'local' || source === 'all') {
+      const query: Record<string, unknown> = { type: 'video' };
+      if (cursor) {
+        query._id = { $lt: cursor };
+      }
+      localVideos = await Post.find(query)
+        .sort({ createdAt: -1 })
+        .limit(PAGE_SIZE)
+        .populate('userId', 'username profileImage')
+        .lean();
     }
 
-    const videos = await Post.find(query)
-      .sort({ createdAt: -1 })
-      .limit(PAGE_SIZE + 1)
-      .populate('userId', 'username profileImage')
-      .lean();
+    let youtubeVideos: any[] = [];
+    if (source === 'youtube' || (source === 'all' && localVideos.length < PAGE_SIZE)) {
+      try {
+        const count = source === 'youtube' ? PAGE_SIZE : PAGE_SIZE - localVideos.length;
+        youtubeVideos = await fetchTrendingVideos(count);
+      } catch (err) {
+        console.error('[YouTube API Error]', err);
+      }
+    }
 
-    const hasMore = videos.length > PAGE_SIZE;
-    const result = hasMore ? videos.slice(0, PAGE_SIZE) : videos;
-
-    const formattedVideos = result.map((video: any) => ({
+    const allVideos = [...localVideos, ...youtubeVideos].map((video: any) => ({
       ...video,
-      isLiked: user ? video.likes?.includes(user.sub) : false,
-      likes: undefined, // Remove heavy array
+      isLiked: user && video.likes ? video.likes.includes(user.sub) : false,
+      likes: undefined,
     }));
 
-    const nextCursor = hasMore ? String(result[result.length - 1]._id) : null;
+    const nextCursor = localVideos.length === PAGE_SIZE ? String(localVideos[localVideos.length - 1]._id) : null;
 
-    return NextResponse.json({ posts: formattedVideos, nextCursor, hasMore });
+    return NextResponse.json({ posts: allVideos, nextCursor, hasMore: !!nextCursor });
   } catch (error) {
     console.error('[GET /api/videos]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
 
 export async function POST(req: NextRequest) {
   try {

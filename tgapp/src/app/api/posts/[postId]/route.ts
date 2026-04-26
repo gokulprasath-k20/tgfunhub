@@ -8,9 +8,11 @@ import { getAuthUser } from '@/lib/auth/middleware';
 // DELETE /api/posts/[postId]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await params;
+
     const user = getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -18,7 +20,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const post = await Post.findById(params.postId);
+    const post = await Post.findById(postId);
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
@@ -29,9 +31,9 @@ export async function DELETE(
 
     // Cascade delete likes and comments
     await Promise.all([
-      Post.findByIdAndDelete(params.postId),
-      Like.deleteMany({ postId: params.postId }),
-      Comment.deleteMany({ postId: params.postId }),
+      Post.findByIdAndDelete(postId),
+      Like.deleteMany({ postId: postId }),
+      Comment.deleteMany({ postId: postId }),
     ]);
 
     return NextResponse.json({ message: 'Post deleted' });

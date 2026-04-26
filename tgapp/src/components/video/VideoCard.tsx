@@ -20,6 +20,7 @@ export function VideoCard({ video }: VideoCardProps) {
             alt={video.content.title || 'Video thumbnail'}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            unoptimized={video.content.thumbnailUrl.includes('ytimg.com')}
           />
         ) : video.content.videoUrl ? (
           // Fallback if no thumbnail: we just use the video tag but paused to grab first frame
@@ -47,6 +48,7 @@ export function VideoCard({ video }: VideoCardProps) {
               width={36}
               height={36}
               className="w-full h-full object-cover"
+              unoptimized={video.userId.profileImage?.includes('ggpht.com')}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center font-bold text-[#a3a3a3]">

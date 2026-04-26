@@ -4,10 +4,11 @@ import User from '@/lib/db/models/User';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
+
 
     await connectDB();
 

@@ -8,6 +8,7 @@ export const UpdateProfileSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
     .optional(),
   bio: z.string().max(160, 'Bio must be 160 characters or less').optional(),
+  profileImage: z.string().url('Invalid image URL').nullable().optional(),
   isPrivate: z.boolean().optional(),
   preferences: z
     .object({

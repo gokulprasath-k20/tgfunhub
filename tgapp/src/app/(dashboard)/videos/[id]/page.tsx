@@ -89,6 +89,7 @@ export default function VideoDetailPage() {
                     width={48}
                     height={48}
                     className="w-full h-full object-cover"
+                    unoptimized={video.userId.profileImage?.includes('ggpht.com')}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center font-bold text-[#a3a3a3] text-lg">

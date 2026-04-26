@@ -2,7 +2,8 @@ import { incr, expire, get } from '@/lib/db/redis';
 import { NextRequest } from 'next/server';
 
 const WINDOW_SECONDS = 15 * 60; // 15 minutes
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = process.env.NODE_ENV === 'development' ? 100 : 5;
+
 
 function getClientIp(req: NextRequest): string {
   return (

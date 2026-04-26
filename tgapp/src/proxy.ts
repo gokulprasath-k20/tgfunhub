@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth/jwt';
 
 // Routes that require authentication
-const PROTECTED = ['/feed', '/profile', '/settings'];
+const PROTECTED = ['/feed', '/profile', '/settings', '/messages', '/reels', '/videos', '/shop'];
 // Routes only accessible when NOT authenticated
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password'];
 

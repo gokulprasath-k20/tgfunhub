@@ -7,9 +7,11 @@ import { getAuthUser } from '@/lib/auth/middleware';
 // POST /api/posts/[postId]/like — toggle like
 export async function POST(
   req: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await params;
+
     const user = getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -19,7 +21,7 @@ export async function POST(
 
     const existing = await Like.findOne({
       userId: user.sub,
-      postId: params.postId,
+      postId: postId,
     });
 
     let liked: boolean;
@@ -32,14 +34,14 @@ export async function POST(
       liked = false;
     } else {
       // Like
-      await Like.create({ userId: user.sub, postId: params.postId });
+      await Like.create({ userId: user.sub, postId: postId });
       delta = 1;
       liked = true;
     }
 
     // Update denormalized count
     const post = await Post.findByIdAndUpdate(
-      params.postId,
+      postId,
       { $inc: { 'stats.likes': delta } },
       { new: true }
     );

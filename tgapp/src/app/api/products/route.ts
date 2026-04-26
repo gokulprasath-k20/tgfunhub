@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/mongoose';
 import Product from '@/lib/db/models/Product';
-import { seedProducts } from '@/lib/db/seedProducts';
+import { seedAll } from '@/lib/db/seedData';
 import { getAuthUser } from '@/lib/auth/middleware';
 
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
     let products = await Product.find({}).sort({ createdAt: -1 }).lean();
     
     if (products.length === 0) {
-      await seedProducts();
+      await seedAll();
       products = await Product.find({}).sort({ createdAt: -1 }).lean();
     }
     

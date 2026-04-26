@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, MessageCircle, Trash2, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, Trash2, MoreHorizontal, Send, Bookmark } from 'lucide-react';
 import type { IPostWithMeta } from '@/types/post';
 import { useAuthStore } from '@/store/authStore';
 import { useToggleLike, useDeletePost } from '@/hooks/usePosts';
@@ -39,168 +39,139 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <article className="card padding-none border-b border-[#e5e5e5] dark:border-[#2a2a2a] last:border-b-0 rounded-none first:rounded-t-lg last:rounded-b-lg">
-      <div className="p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <Link
-            href={`/profile/${author?.username ?? ''}`}
-            className="flex items-center gap-3 group"
-          >
-            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-[#e5e5e5] dark:bg-[#2a2a2a] flex-shrink-0">
-              {author?.profileImage ? (
-                <Image
-                  src={author.profileImage}
-                  alt={author.username}
-                  fill
-                  className="object-cover"
-                  sizes="36px"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-[#525252] dark:text-[#a3a3a3]">
-                  {author?.username?.[0]?.toUpperCase() ?? '?'}
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#0a0a0a] dark:text-[#fafafa] group-hover:underline">
-                {author?.username ?? 'unknown'}
-              </p>
-              <p className="text-xs text-[#a3a3a3] dark:text-[#525252]">
-                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-              </p>
-            </div>
-          </Link>
-
-          {isOwner && (
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="btn-ghost p-1.5 rounded-md"
-                aria-label="Post options"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              {showMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowMenu(false)}
-                  />
-                  <div className="absolute right-0 top-8 z-20 w-36 bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-lg shadow-[0_4px_12px_rgb(0,0,0,0.1)] py-1">
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        setShowDeleteModal(true);
-                      }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Delete post
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <p className="text-sm text-[#0a0a0a] dark:text-[#fafafa] leading-relaxed mb-3 whitespace-pre-wrap">
-          {post.content.text}
-        </p>
-
-        {/* Images */}
-        {post.content.images && post.content.images.length > 0 && (
-          <div
-            className={`grid gap-2 mb-3 rounded-lg overflow-hidden ${
-              post.content.images.length === 1
-                ? 'grid-cols-1'
-                : post.content.images.length === 2
-                ? 'grid-cols-2'
-                : 'grid-cols-2'
-            }`}
-          >
-            {post.content.images.slice(0, 4).map((url, i) => (
-              <div
-                key={i}
-                className={`relative overflow-hidden rounded-lg bg-[#f9f9f9] dark:bg-[#1a1a1a] ${
-                  post.content.images!.length === 1 ? 'aspect-video' : 'aspect-square'
-                }`}
-              >
-                <Image
-                  src={url}
-                  alt={`Post image ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, 600px"
-                  loading="lazy"
-                />
+    <article className="bg-white dark:bg-[#0a0a0a] border-b border-[#e5e5e5] dark:border-[#262626] md:border md:rounded-lg overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-3">
+        <Link
+          href={`/profile/${author?.username ?? ''}`}
+          className="flex items-center gap-2.5 group"
+        >
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-[#e5e5e5] dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#262626]">
+            {author?.profileImage ? (
+              <Image
+                src={author.profileImage}
+                alt={author.username}
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[#a3a3a3]">
+                {author?.username?.[0]?.toUpperCase() ?? '?'}
               </div>
-            ))}
+            )}
           </div>
-        )}
+          <div>
+            <p className="text-[13px] font-bold text-[#0a0a0a] dark:text-[#fafafa] leading-none">
+              {author?.username ?? 'unknown'}
+            </p>
+            <p className="text-[10px] text-[#a3a3a3] dark:text-[#525252] mt-0.5">
+              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+            </p>
+          </div>
+        </Link>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4 pt-1 border-t border-[#f0f0f0] dark:border-[#1f1f1f]">
+        {isOwner && (
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="p-1.5 hover:bg-[#f9f9f9] dark:hover:bg-[#111111] rounded-full transition-colors"
+          >
+            <MoreHorizontal className="w-5 h-5 text-[#737373]" />
+          </button>
+        )}
+      </div>
+
+      {/* Images - Instagram style full width */}
+      {post.content.images && post.content.images.length > 0 && (
+        <div className="relative aspect-square w-full bg-[#f9f9f9] dark:bg-[#111111]">
+          <Image
+            src={post.content.images[0]}
+            alt="Post content"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 600px"
+            priority={false}
+          />
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="px-3 pt-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <button
             onClick={handleLike}
             disabled={toggleLike.isPending}
-            className={`flex items-center gap-1.5 py-2 text-sm transition-all duration-150 ${
-              post.isLiked
-                ? 'text-red-500'
-                : 'text-[#a3a3a3] dark:text-[#525252] hover:text-[#525252] dark:hover:text-[#a3a3a3]'
-            }`}
-            aria-label={post.isLiked ? 'Unlike post' : 'Like post'}
+            className={`transition-transform active:scale-125 ${post.isLiked ? 'text-red-500' : 'text-[#0a0a0a] dark:text-[#fafafa]'}`}
           >
-            <Heart
-              className={`w-4 h-4 transition-transform duration-150 ${
-                post.isLiked ? 'fill-red-500 scale-110' : ''
-              }`}
-            />
-            <span className="tabular-nums">{post.stats.likes}</span>
+            <Heart className={`w-7 h-7 ${post.isLiked ? 'fill-current' : 'stroke-[1.5px]'}`} />
+          </button>
+          
+          <button 
+            onClick={() => setShowComments(!showComments)}
+            className="text-[#0a0a0a] dark:text-[#fafafa] transition-transform active:scale-125"
+          >
+            <MessageCircle className="w-7 h-7 stroke-[1.5px]" />
           </button>
 
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 py-2 text-sm text-[#a3a3a3] dark:text-[#525252] hover:text-[#525252] dark:hover:text-[#a3a3a3] transition-colors duration-150"
-            aria-label="Toggle comments"
-            aria-expanded={showComments}
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span className="tabular-nums">{post.stats.comments}</span>
+          <button className="text-[#0a0a0a] dark:text-[#fafafa] transition-transform active:scale-125">
+            <Send className="w-7 h-7 stroke-[1.5px]" />
           </button>
         </div>
+
+        <button className="text-[#0a0a0a] dark:text-[#fafafa]">
+          <Bookmark className="w-7 h-7 stroke-[1.5px]" />
+        </button>
       </div>
 
-      {/* Comments */}
+      {/* Likes Count */}
+      <div className="px-3 pt-2">
+        <p className="text-sm font-bold">{post.stats.likes.toLocaleString()} likes</p>
+      </div>
+
+      {/* Caption */}
+      <div className="px-3 pt-1.5 pb-2">
+        <p className="text-sm leading-relaxed">
+          <span className="font-bold mr-2">{author?.username}</span>
+          <span className="text-[#0a0a0a] dark:text-[#fafafa] whitespace-pre-wrap">{post.content.text}</span>
+        </p>
+        
+        {post.stats.comments > 0 && !showComments && (
+          <button 
+            onClick={() => setShowComments(true)}
+            className="text-sm text-[#a3a3a3] dark:text-[#737373] mt-1.5 block"
+          >
+            View all {post.stats.comments} comments
+          </button>
+        )}
+      </div>
+
+      {/* Comments Section */}
       {showComments && (
-        <div className="border-t border-[#f0f0f0] dark:border-[#1f1f1f] px-4 pb-4">
+        <div className="px-3 pb-4 border-t border-[#f0f0f0] dark:border-[#1f1f1f] mt-2">
           <CommentSection postId={post._id} />
         </div>
       )}
 
-      {/* Delete confirmation */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Delete post"
-        size="sm"
-      >
-        <p className="text-sm text-[#525252] dark:text-[#a3a3a3] mb-6">
-          This will permanently delete your post and all its comments. This action cannot be undone.
-        </p>
+      {/* Menus/Modals */}
+      {showMenu && (
+        <Modal isOpen={showMenu} onClose={() => setShowMenu(false)} size="sm">
+          <div className="flex flex-col divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a]">
+            <button 
+              onClick={() => { setShowMenu(false); setShowDeleteModal(true); }}
+              className="py-4 text-sm font-bold text-red-500 active:bg-[#f9f9f9] dark:active:bg-[#111111]"
+            >
+              Delete
+            </button>
+            <button onClick={() => setShowMenu(false)} className="py-4 text-sm">Cancel</button>
+          </div>
+        </Modal>
+      )}
+
+      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete post?" size="sm">
+        <p className="text-sm text-[#737373] mb-6">Are you sure you want to delete this post? This action cannot be undone.</p>
         <div className="flex gap-3 justify-end">
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleDelete}
-            isLoading={deletePost.isPending}
-          >
-            Delete
-          </Button>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+          <Button variant="danger" onClick={handleDelete} isLoading={deletePost.isPending}>Delete</Button>
         </div>
       </Modal>
     </article>

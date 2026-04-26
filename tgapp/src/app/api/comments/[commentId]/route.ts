@@ -7,9 +7,10 @@ import { getAuthUser } from '@/lib/auth/middleware';
 // DELETE /api/comments/[commentId]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { commentId: string } }
+  { params }: { params: Promise<{ commentId: string }> }
 ) {
   try {
+    const { commentId } = await params;
     const user = getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -17,7 +18,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const comment = await Comment.findById(params.commentId);
+    const comment = await Comment.findById(commentId);
     if (!comment) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
     }
@@ -30,8 +31,8 @@ export async function DELETE(
 
     // Delete comment and its replies
     await Promise.all([
-      Comment.findByIdAndDelete(params.commentId),
-      Comment.deleteMany({ parentId: params.commentId }),
+      Comment.findByIdAndDelete(commentId),
+      Comment.deleteMany({ parentId: commentId }),
     ]);
 
     // Decrement count only for top-level

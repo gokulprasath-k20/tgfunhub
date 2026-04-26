@@ -75,7 +75,7 @@ export default function FeedPage() {
       )}
 
       {!isLoading && posts.length > 0 && (
-        <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-lg overflow-hidden divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a]">
+        <div className="space-y-4 md:border md:border-[#e5e5e5] md:dark:border-[#2a2a2a] md:rounded-lg md:overflow-hidden md:divide-y md:divide-[#e5e5e5] md:dark:divide-[#2a2a2a]">
           {posts.map((post: IPostWithMeta, i: number) => (
             <motion.div
               key={post._id}

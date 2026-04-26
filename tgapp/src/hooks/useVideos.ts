@@ -3,12 +3,13 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IPostWithMeta, PostsResponse } from '@/types/post';
 
-export function useVideos() {
+export function useVideos(source: 'local' | 'youtube' = 'local') {
   return useInfiniteQuery({
-    queryKey: ['videos'],
+    queryKey: ['videos', source],
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
       if (pageParam) params.set('cursor', pageParam as string);
+      params.set('source', source);
       
       const res = await fetch(`/api/videos?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch videos');
@@ -18,6 +19,7 @@ export function useVideos() {
     initialPageParam: undefined as string | undefined,
   });
 }
+
 
 export function useCreateVideo() {
   const qc = useQueryClient();

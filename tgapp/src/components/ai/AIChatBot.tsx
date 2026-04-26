@@ -15,9 +15,16 @@ export function AIChatBot() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: `Hey ${user?.username || 'there'}! I'm your TG Hub assistant. How can I help you today?` }
+    { role: 'assistant', content: "Hey! I'm your TG Hub assistant. How can I help you today?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update initial message when user is loaded
+  useEffect(() => {
+    if (user && messages.length === 1 && messages[0].content.includes("Hey!")) {
+      setMessages([{ role: 'assistant', content: `Hey ${user.username}! I'm your TG Hub assistant. How can I help you today?` }]);
+    }
+  }, [user, messages]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,12 +50,19 @@ export function AIChatBot() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
 
+      if (res.status === 401) {
+        throw new Error('Please log in to use the assistant.');
+      }
+      
       if (!res.ok) throw new Error('Failed to get AI response');
       
       const data = await res.json();
       setMessages((prev) => [...prev, { role: 'assistant', content: data.content }]);
-    } catch (error) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to the network right now. Please try again later." }]);
+    } catch (error: any) {
+      const errorMsg = error.message.includes('log in') 
+        ? "You need to be logged in to chat with me. Please sign in to your account."
+        : "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
+      setMessages((prev) => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
