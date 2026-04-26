@@ -15,7 +15,8 @@ import {
   MessageSquare, 
   Heart,
   Search,
-  PlusSquare
+  PlusSquare,
+  ShoppingBag
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -67,6 +68,13 @@ export function Navbar() {
         {/* Right side - Actions */}
         <div className="flex items-center gap-1.5 md:gap-3">
           <ThemeToggle compact />
+          
+          <Link 
+            href="/shop"
+            className="p-2 hover:bg-[#f9f9f9] dark:hover:bg-[#111111] rounded-full transition-colors"
+          >
+            <ShoppingBag className="w-6 h-6 stroke-[1.5px]" />
+          </Link>
           
           <Link 
             href="/activity"
